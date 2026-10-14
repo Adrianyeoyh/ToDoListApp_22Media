@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\ToDoListsController;
 use Illuminate\Support\Facades\Route;
 
+
 // GET|HEAD api/todo-lists
-Route::get('/', );  
+Route::get('/', [ToDoListsController::class, 'getToDoLists']);
 
 //POST api/todo-lists
 Route::post('/', );  
