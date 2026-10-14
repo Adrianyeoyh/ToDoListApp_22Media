@@ -19,7 +19,7 @@ class TodoListResource extends JsonResource
             'name' => (string) $this->name,
             'created_at' => (string) $this->created_at,
             'updated_at' => (string) $this->updated_at,
-            // "todos": [ ... Todo Resources ... ]
+            "todos" => TodoResource::collection($this->todos)
         ];
     }
 }
