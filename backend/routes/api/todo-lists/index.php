@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [ToDoListsController::class, 'getToDoLists']);
 
 //POST api/todo-lists
-Route::post('/', );  
+Route::post('/', [ToDoListsController::class, 'postToDoLists']);  
 
 //GET|HEAD api/todo-lists/{todo_list_id}
-Route::get('/{to_do_list_id}',);
+Route::get('/{to_do_list_id}', [ToDoListsController::class, 'getToDoListsById'])
+    ->whereNumber('id');
 
-//POST api/todo-lists/{todo_list_id}
-Route::post('/{to_do_list_id}',);
+// PUT|PATCH api/todo-lists/{todo_list_id}
+Route::put('/{to_do_list_id}', [ToDoListsController::class, 'putToDoListsById'])
+    ->whereNumber('id');
