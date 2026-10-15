@@ -2,36 +2,45 @@
 
 namespace App\Services;
 
-use App\Data\ToDoListData;
+use App\Data\RequestToDoListData;
 use App\Models\TodoList;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class TodoListService
 {
-    public function getToDoLists() {
+    /**
+     * @return Collection<int, TodoList>
+     */
+    public function getToDoLists(): Collection
+    {
         return TodoList::with('todos')->get();
     }
 
-    public function createToDoList(ToDoListData $data) {
-        return TodoList::create($data);
+    public function createToDoList(RequestToDoListData $data): TodoList
+    {
+        return TodoList::create($data->toArray());
     }
 
-    public function getToDoListsById(int $id) {
+    public function getToDoListsById(int $id): TodoList
+    {
         return TodoList::with('todos')->findOrFail($id);
     }
-    
-    public function putToDoListsById(int $id, ToDoListData $data) {
-        $list = TodoList::with('todos')->findOrFail($id);
+
+    public function putToDoListsById(int $id, RequestToDoListData $data): TodoList
+    {
+        $list = TodoList::findOrFail($id);
         $list->update($data->toArray());
+
         return $list->fresh('todos');
     }
 
-    public function deleteToDoListById(int $id) {
-        $list = TodoList::with('todos')->findOrFail($id);
+    public function deleteToDoListById(int $id): void
+    {
+        $list = TodoList::findOrFail($id);
         DB::transaction(function () use ($list) {
             $list->todos()->delete();
             $list->delete();
         });
-        return ;
     }
 }
