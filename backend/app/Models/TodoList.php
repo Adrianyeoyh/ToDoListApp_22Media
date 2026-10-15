@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TodoList extends Model
+class ToDoList extends Model
 {
     protected $fillable = ['name'];
     
     public function todos()
     {
-        return $this->hasMany(Todo::class);
+        return $this->hasMany(ToDo::class);
     }
 }

@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('todos', function (Blueprint $table) {
+        Schema::create('to_dos', function (Blueprint $table) {
             $table->id();
             $table->string('description');
             $table->boolean('is_done')->default(false);
-            $table->foreignId('todo_list_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('to_do_list_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('todos');
+        Schema::dropIfExists('to_dos');
     }
 };

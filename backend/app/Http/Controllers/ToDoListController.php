@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 
-class ToDoListsController extends Controller
+class ToDoListController extends Controller
 {
     public function __construct(private TodoListService $service) {}
 
@@ -21,7 +21,7 @@ class ToDoListsController extends Controller
         return ToDoListData::collect($this->service->getToDoLists());
     }
 
-    public function postToDoLists(RequestToDoListData $data): JsonResponse
+    public function createToDoList(RequestToDoListData $data): JsonResponse
     {
         $list = $this->service->createToDoList($data);
 
@@ -30,21 +30,21 @@ class ToDoListsController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    public function getToDoListsById(int $id): ToDoListData
+    public function getToDoListById(int $id): ToDoListData
     {
-        $list = $this->service->getToDoListsById($id);
+        $list = $this->service->getToDoListById($id);
 
         return ToDoListData::from($list);
     }
 
-    public function putToDoListsById(int $id, RequestToDoListData $data): ToDoListData
+    public function updateToDoListById(int $id, RequestToDoListData $data): ToDoListData
     {
-        $list = $this->service->putToDoListsById($id, $data);
+        $list = $this->service->updateToDoListById($id, $data);
 
         return ToDoListData::from($list);
     }
 
-    public function deleteToDoListsById(int $id): Response
+    public function deleteToDoListById(int $id): Response
     {
         $this->service->deleteToDoListById($id);
 
