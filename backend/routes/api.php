@@ -7,6 +7,5 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
-Route::get('/health', fn () => ['status' => 'up']);
 Route::prefix('/todo-lists')
     ->group(base_path('routes/api/todo-lists/index.php'));
