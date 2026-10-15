@@ -14,5 +14,6 @@ class RequestToDoData extends Data
         #[Max(255)]
         public string $description,
         public bool $is_done = false,
+        public int $to_do_list_id
     ) {}
 }

@@ -23,19 +23,19 @@ class TodoService
 
     public function getToDoById(int $id): ToDo
     {
-        return ToDo::all()->findOrFail($id);
+        return ToDo::findOrFail($id);
     }
 
     public function updateToDoById(int $id, RequestToDoData $data): ToDo
     {
-        $list = ToDo::all()->findOrFail($id);
+        $list = ToDo::findOrFail($id);
         $list->update($data->toArray());
         return $list->fresh();
     }
 
     public function deleteToDoById(int $id): void
     {
-        $list = ToDo::all()->findOrFail($id);
+        $list = ToDo::allfindOrFail($id);
         $list->delete();
     }
 }
