@@ -2,12 +2,17 @@
 
 namespace App\Data;
 
+use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Data;
 
-class ToDoData extends Data
+/**
+ * Input shape for creating or updating a todo: the client may only send the description and done state.
+ */
+class RequestToDoData extends Data
 {
     public function __construct(
+        #[Max(255)]
         public string $description,
-        public bool $is_done,
+        public bool $is_done = false,
     ) {}
 }
