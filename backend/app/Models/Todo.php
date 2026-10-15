@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Todo extends Model
+class ToDo extends Model
 {
-    protected $fillable = ['description', 'is_done', 'todo_list_id'];
+    protected $fillable = ['description', 'is_done', 'to_do_list_id'];
 
     /**
      * @return array<string, string>

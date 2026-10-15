@@ -1,22 +1,18 @@
 <?php
 
-use App\Http\Controllers\ToDoListsController;
+use App\Http\Controllers\ToDoListController;
 use Illuminate\Support\Facades\Route;
 
 
-// GET|HEAD api/todo-lists
-Route::get('/', [ToDoListsController::class, 'getToDoLists']);
+Route::get('/', [ToDoListController::class, 'getToDoLists']);
 
-//POST api/todo-lists
-Route::post('/', [ToDoListsController::class, 'postToDoLists']);  
+Route::post('/', [ToDoListController::class, 'createToDoList']);  
 
-//GET|HEAD api/todo-lists/{todo_list_id}
-Route::get('/{to_do_list_id}', [ToDoListsController::class, 'getToDoListsById'])
+Route::get('/{to_do_list_id}', [ToDoListController::class, 'getToDoListById'])
     ->whereNumber('to_do_list_id');
 
-// PUT|PATCH api/todo-lists/{todo_list_id}
-Route::put('/{to_do_list_id}', [ToDoListsController::class, 'putToDoListsById'])
+Route::put('/{to_do_list_id}', [ToDoListController::class, 'updateToDoListById'])
     ->whereNumber('to_do_list_id');
 
-Route::delete('/{to_do_list_id}', [ToDoListsController::class, 'deleteToDoListsById'])
+Route::delete('/{to_do_list_id}', [ToDoListController::class, 'deleteToDoListById'])
     ->whereNumber('to_do_list_id');

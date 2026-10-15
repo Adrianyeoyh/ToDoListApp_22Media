@@ -13,7 +13,7 @@ class ToDoData extends Data
         public int $id,
         public string $description,
         public bool $is_done,
-        public int $todo_list_id,
+        public int $to_do_list_id,
         public string $created_at,
         public string $updated_at,
     ) {}
