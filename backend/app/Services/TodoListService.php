@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Data\ToDoListData;
 use App\Models\TodoList;
+use Illuminate\Support\Facades\DB;
 
 class TodoListService
 {
@@ -11,7 +12,7 @@ class TodoListService
         return TodoList::with('todos')->get();
     }
 
-    public function createToDoList(array $data) {
+    public function createToDoList(ToDoListData $data) {
         return TodoList::create($data);
     }
 
@@ -23,5 +24,14 @@ class TodoListService
         $list = TodoList::with('todos')->findOrFail($id);
         $list->update($data->toArray());
         return $list->fresh('todos');
+    }
+
+    public function deleteToDoListById(int $id) {
+        $list = TodoList::with('todos')->findOrFail($id);
+        DB::transaction(function () use ($list) {
+            $list->todos()->delete();
+            $list->delete();
+        });
+        return ;
     }
 }

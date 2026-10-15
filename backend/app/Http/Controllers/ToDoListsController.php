@@ -17,7 +17,7 @@ class ToDoListsController extends Controller
     }
 
     public function postToDoLists(ToDoListData $data) {
-        $list = $this->service->createTodoList(['name' => $data->name]);
+        $list = $this->service->createTodoList($data);
         return TodoListData::from($list->load('todos'));
     }
 
@@ -29,5 +29,10 @@ class ToDoListsController extends Controller
     public function putToDoListsById(int $id, ToDoListData $data) {
         $list = $this->service->putToDoListsById($id, $data);
         return ToDoListData::from($list->load('todos'));
+    }
+
+    public function deleteToDoListById(int $id) {
+        $this->service->deleteToDoListById($id);
+        return response()->noContent();
     }
 }
