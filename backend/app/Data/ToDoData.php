@@ -2,7 +2,9 @@
 
 namespace App\Data;
 
+use Illuminate\Support\Carbon;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
 
 class ToDoData extends Data
 {
@@ -11,7 +13,10 @@ class ToDoData extends Data
         public string $description,
         public bool $is_done,
         public int $todo_list_id,
-        public string $created_at,
-        public string $updated_at,
+        public Carbon $created_at,
+        public Carbon $updated_at,
+
+        #[DataCollectionOf(TodoData::class)]
+        public array $todos,
     ) {}
 }

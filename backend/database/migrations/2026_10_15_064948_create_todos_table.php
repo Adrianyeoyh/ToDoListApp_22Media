@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('description');
             $table->boolean('is_done')->default(false);
-            $table->foreignId('todo_list_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('todo_list_id')
+                ->index()
+                ->constrained()
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

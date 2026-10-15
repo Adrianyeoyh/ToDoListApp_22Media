@@ -4,6 +4,7 @@ namespace App\Data;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Illuminate\Support\Carbon;
 
 
 class ToDoListData extends Data
@@ -11,8 +12,8 @@ class ToDoListData extends Data
     public function __construct(
         public int $id,
         public string $name,
-        public string $created_at,
-        public string $updated_at,
+        public Carbon $created_at,
+        public Carbon $updated_at,
 
         #[DataCollectionOf(TodoData::class)]
         public array $todos,
