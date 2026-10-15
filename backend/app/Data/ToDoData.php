@@ -4,6 +4,9 @@ namespace App\Data;
 
 use Spatie\LaravelData\Data;
 
+/**
+ * Output shape of a todo returned by the API.
+ */
 class ToDoData extends Data
 {
     public function __construct(

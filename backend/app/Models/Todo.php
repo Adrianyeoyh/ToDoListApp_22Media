@@ -7,4 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Todo extends Model
 {
     protected $fillable = ['description', 'is_done', 'todo_list_id'];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_done' => 'boolean',
+        ];
+    }
 }
