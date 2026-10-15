@@ -2,9 +2,17 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\JsonResponse;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', static function (): JsonResponse {
+    return response()->json([
+        'framework' => 'Laravel',
+        'message' => 'Hello from Laravel and FrankenPHP on Vercel',
+    ]);
+});
+
+Route::get('/health', static function (): JsonResponse {
+    return response()->json(['status' => 'ok']);
 });
 
 Route::get('/dashboard', function () {
