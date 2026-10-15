@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Data\RequestToDoListData;
 use App\Data\ToDoListData;
 use App\Services\TodoListService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 
@@ -21,13 +20,11 @@ class ToDoListController extends Controller
         return ToDoListData::collect($this->service->getToDoLists());
     }
 
-    public function createToDoList(RequestToDoListData $data): JsonResponse
+    public function createToDoList(RequestToDoListData $data): ToDoListData
     {
         $list = $this->service->createToDoList($data);
 
-        return ToDoListData::from($list->load('todos'))
-            ->toResponse(request())
-            ->setStatusCode(Response::HTTP_CREATED);
+        return ToDoListData::from($list->load('todos'));
     }
 
     public function getToDoListById(int $id): ToDoListData
