@@ -35,7 +35,7 @@ class TodoService
 
     public function deleteToDoById(int $id): void
     {
-        $list = ToDo::allfindOrFail($id);
+        $list = ToDo::findOrFail($id);
         $list->delete();
     }
 }

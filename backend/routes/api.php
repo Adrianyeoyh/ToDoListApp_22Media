@@ -9,3 +9,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('/todo-lists')
     ->group(base_path('routes/api/todo-lists/index.php'));
+
+Route::prefix('/todos')
+    ->group(base_path('routes/api/todos/index.php'));

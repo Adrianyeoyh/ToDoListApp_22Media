@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Data;
 
@@ -11,9 +12,10 @@ use Spatie\LaravelData\Data;
 class RequestToDoData extends Data
 {
     public function __construct(
+        #[Exists('to_do_lists', 'id')]
+        public int $to_do_list_id,
         #[Max(255)]
         public string $description,
         public bool $is_done = false,
-        public int $to_do_list_id
     ) {}
 }

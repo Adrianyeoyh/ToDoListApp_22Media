@@ -11,8 +11,8 @@ Route::post('/', [ToDoController::class, 'createToDo']);
 Route::get('/{to_do_id}', [ToDoController::class, 'getToDoById'])
     ->whereNumber('to_do_id');
 
-Route::put('/{to_do_id}', [ToDoController::class, 'updateToDoListById'])
+Route::put('/{to_do_id}', [ToDoController::class, 'updateToDoById'])
     ->whereNumber('to_do_id');
 
-Route::delete('/{to_do_id}', [ToDoController::class, 'deleteToDoListById'])
+Route::delete('/{to_do_id}', [ToDoController::class, 'deleteToDoById'])
     ->whereNumber('to_do_id');
