@@ -1,4 +1,3 @@
-import { request } from "./lib/api";
+import { request } from "./utils/api";
 
-
-export const getHealth = () => request('/health');
+export const getHealth = () => request("/health");
