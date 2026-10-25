@@ -3,23 +3,22 @@ import { Text } from "@/components/ui/text";
 import { useEffect, useState } from "react";
 import type { ToDoList } from "@/services/utils/types";
 import { getToDoLists } from "@/services/ToDoListService";
-import { ApiError } from "@/services/utils/api";
-import { getErrorMessage } from "@/lib/get-error-message";
+import { useErrorModal } from '@/components/feedback/ErrorModalProvider';
 
 export default function HomeScreen() {
+  const { showError } = useErrorModal();   // ← pulls showError out of the context
+
   const [toDoLists, setToDoLists] = useState<ToDoList[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const loadToDoLists = async () => {
       try {
         setIsLoading(true);
-        setErrorMessage(null);
         const res: ToDoList[] = await getToDoLists();
         setToDoLists(res);
       } catch (e) {
-        setErrorMessage(getErrorMessage(e))
+        showError(e);
       } finally {
         setIsLoading(false);
       }
