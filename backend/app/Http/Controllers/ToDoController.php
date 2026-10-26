@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Data\RequestToDoData;
+use App\Data\RequestUpdateToDoData;
 use App\Data\ToDoData;
 use App\Services\TodoService;
 use Illuminate\Support\Collection;
@@ -35,7 +36,7 @@ class ToDoController extends Controller
         return ToDoData::from($list);
     }
 
-    public function updateToDoById(int $id, RequestToDoData $data): ToDoData
+    public function updateToDoById(int $id, RequestUpdateToDoData $data): ToDoData
     {
         $list = $this->service->updateToDoById($id, $data);
 

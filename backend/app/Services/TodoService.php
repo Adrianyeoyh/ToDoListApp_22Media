@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Data\RequestToDoData;
+use App\Data\RequestUpdateToDoData;
 use App\Models\ToDo;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -26,7 +27,7 @@ class TodoService
         return ToDo::findOrFail($id);
     }
 
-    public function updateToDoById(int $id, RequestToDoData $data): ToDo
+    public function updateToDoById(int $id, RequestUpdateToDoData $data): ToDo
     {
         $list = ToDo::findOrFail($id);
         $list->update($data->toArray());

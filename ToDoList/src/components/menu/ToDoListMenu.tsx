@@ -8,6 +8,7 @@ import { Text } from "@/components/ui/text";
 import type { ToDoList } from '@/services/utils/types';
 import { ApiError } from "@/services/utils/api";
 import CreateListModalForm from "./CreateListModalForm";
+import UpdateListModalForm from "./UpdateListModalForm";
 
 
 export default function ToDoListMenu() {
@@ -19,6 +20,7 @@ export default function ToDoListMenu() {
   const [reloadCount, setReloadCount] = useState(0);
 
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);   // ← new
+  const [editingToDoList, setEditingToDoList] = useState<ToDoList | null>(null);
 
   const refreshToDoLists = () => {
     setIsRefreshing(true);
@@ -54,8 +56,8 @@ export default function ToDoListMenu() {
     <FlatList
       data={toDoLists}
       keyExtractor={(toDoList) => String(toDoList.id)}
-      renderItem={({ item }) => <ToDoListMenuCard toDoList={item} />}
-      contentContainerClassName="gap-3 pt-4"
+      renderItem={({ item }) => <ToDoListMenuCard toDoList={item} onEdit={() => setEditingToDoList(item)} />}
+      contentContainerClassName="gap-5 px-3 pt-5"
       ListEmptyComponent={<Text variant="muted">No lists yet.</Text>}
       refreshing={isRefreshing}
       onRefresh={refreshToDoLists}
@@ -78,6 +80,18 @@ export default function ToDoListMenu() {
           setIsCreateOpen(false);
         }}
       />
+
+      {editingToDoList && (
+        <UpdateListModalForm
+          key={editingToDoList.id}
+          toDoList={editingToDoList}
+          onClose={() => setEditingToDoList(null)}
+          onUpdated={(updated) => {
+            setToDoLists((lists) => lists.map((list) => (list.id === updated.id ? updated : list)));
+            setEditingToDoList(null);
+          }}
+        />
+      )}
     </View>
   );
 
