@@ -1,10 +1,11 @@
 import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { ChevronLeft, Plus } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useErrorModal } from '@/components/feedback/ErrorModalProvider';
 import { ToDo, ToDoList } from '@/services/utils/types';
 import { getToDoList } from '@/services/ToDoListService';
+import { deleteToDo } from '@/services/ToDoService';
 import { ApiError } from '@/services/utils/api';
 import { Text } from '@/components/ui/text';
 import ToDoItem from '@/components/toDoList/toDo';
@@ -52,16 +53,47 @@ export default function ToDoListScreen() {
       setToDos((current) => current.map((toDo) => (toDo.id === updated.id ? updated : toDo)));
     };
 
+    const deleteToDoItem = async (toDo: ToDo) => {
+      const index = toDos.findIndex((current) => current.id === toDo.id);
+      setToDos((current) => current.filter((item) => item.id !== toDo.id));
+      try {
+        await deleteToDo(toDo.id);
+      } catch (e) {
+        // 404 means it is already gone, so the delete still counts.
+        if (e instanceof ApiError && e.status === 404) {
+          return;
+        }
+        setToDos((current) => [...current.slice(0, index), toDo, ...current.slice(index)]);
+        if (e instanceof ApiError) {
+          showError(e);
+        } else {
+          throw e;
+        }
+      }
+    };
+
+    const goBack = () => {
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/');
+      }
+    };
+
     if (isLoading) {
       return <ActivityIndicator size="large" className="mt-8" />;
     }
   return (
       <View className="flex-1 bg-background p-6">        
         <View className="flex-1">
+          <Pressable onPress={goBack} hitSlop={8} className="-ml-1 mb-3 flex-row items-center self-start active:opacity-60">
+            <ChevronLeft size={22} color="#111" />
+            <Text className="font-medium">Back</Text>
+          </Pressable>
           <Text variant="h3">{toDoList?.name}</Text>
           <FlatList data={toDos}
               keyExtractor={(toDo) => String(toDo.id)}
-              renderItem={({ item }) => <ToDoItem toDo={item} onUpdated={replaceToDo} />}
+              renderItem={({ item }) => <ToDoItem toDo={item} onUpdated={replaceToDo} onDelete={deleteToDoItem} />}
               contentContainerClassName="gap-3 pt-4"
               ListEmptyComponent={<Text variant="muted">No To-Dos Yet.</Text>}
               refreshing={isRefreshing}

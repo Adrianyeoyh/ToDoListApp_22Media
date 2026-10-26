@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { Trash2 } from 'lucide-react-native';
 
 import { useErrorModal } from '@/components/feedback/ErrorModalProvider';
 import { Card, CardDescription } from '@/components/ui/card';
@@ -14,9 +16,10 @@ import type { ToDo } from '@/services/utils/types';
 type ToDoItemProps = {
   toDo: ToDo;
   onUpdated: (toDo: ToDo) => void;
+  onDelete: (toDo: ToDo) => void;
 };
 
-export default function ToDoItem({ toDo, onUpdated }: ToDoItemProps) {
+export default function ToDoItem({ toDo, onUpdated, onDelete }: ToDoItemProps) {
   const { showError } = useErrorModal();
   const [isDone, setIsDone] = useState(toDo.is_done);
   const [isEditing, setIsEditing] = useState(false);
@@ -56,36 +59,53 @@ export default function ToDoItem({ toDo, onUpdated }: ToDoItemProps) {
     }
   };
 
+  const renderDeleteAction = () => (
+    <Pressable
+      onPress={() => onDelete(toDo)}
+      className="ml-3 w-20 items-center justify-center rounded-xl bg-red-600 active:opacity-80"
+    >
+      <Trash2 size={24} color="white" />
+    </Pressable>
+  );
+
   const descriptionClassName = cn('text-sm text-muted-foreground', isDone && 'line-through');
 
   return (
-    <Card className="gap-2 p-4">
-      <View className="flex-row items-center gap-3">
-        <Checkbox checked={isDone} onCheckedChange={toggleDone} />
-        {isEditing ? (
-          <TextInput
-            value={description}
-            onChangeText={setDescription}
-            onBlur={saveDescription}
-            autoFocus
-            multiline
-            submitBehavior="blurAndSubmit"
-            className={cn('flex-1 p-0', descriptionClassName)}
-            style={{ paddingVertical: 0, includeFontPadding: false }}
-          />
-        ) : (
-          <Pressable onPress={() => setIsEditing(true)} className="flex-1">
-            <CardDescription className={descriptionClassName}>{description}</CardDescription>
-          </Pressable>
-        )}
-      </View>
+    <ReanimatedSwipeable
+      renderRightActions={renderDeleteAction}
+      onSwipeableOpen={() => onDelete(toDo)}
+      rightThreshold={60}
+      friction={1.5}
+      overshootRight={false}
+    >
+      <Card className="gap-2 p-4">
+        <View className="flex-row items-center gap-3">
+          <Checkbox checked={isDone} onCheckedChange={toggleDone} />
+          {isEditing ? (
+            <TextInput
+              value={description}
+              onChangeText={setDescription}
+              onBlur={saveDescription}
+              autoFocus
+              multiline
+              submitBehavior="blurAndSubmit"
+              className={cn('flex-1 p-0', descriptionClassName)}
+              style={{ paddingVertical: 0, includeFontPadding: false }}
+            />
+          ) : (
+            <Pressable onPress={() => setIsEditing(true)} className="flex-1">
+              <CardDescription className={descriptionClassName}>{description}</CardDescription>
+            </Pressable>
+          )}
+        </View>
 
-      <View className="ml-[7px] flex-row items-end gap-2">
-        <View className="mb-[7px] h-3 w-3 rounded-bl-md border-b border-l border-border" />
-        <Text className="text-xs text-muted-foreground">
-          Last updated {formatDateTime(parseApiTimestamp(toDo.updated_at))}
-        </Text>
-      </View>
-    </Card>
+        <View className="ml-[7px] flex-row items-end gap-2">
+          <View className="mb-[7px] h-3 w-3 rounded-bl-md border-b border-l border-border" />
+          <Text className="text-xs text-muted-foreground">
+            Last updated {formatDateTime(parseApiTimestamp(toDo.updated_at))}
+          </Text>
+        </View>
+      </Card>
+    </ReanimatedSwipeable>
   );
 }
