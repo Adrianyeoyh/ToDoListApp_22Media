@@ -6,7 +6,7 @@ export const getToDos = () => request<ToDo[]>("/api/todos");
 export const getToDo = (id: number) => request<ToDo>(`/api/todos/${id}`);
 
 export const createToDo = (input: {
-  to_do_list_id: number;
+  to_do_list_id: string;
   description: string;
   is_done?: boolean;
 }) =>

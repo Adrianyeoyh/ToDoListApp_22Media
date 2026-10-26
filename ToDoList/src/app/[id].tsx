@@ -1,11 +1,14 @@
-// app/item/[id].tsx
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
+import { Plus } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useErrorModal } from '@/components/feedback/ErrorModalProvider';
 import { ToDo, ToDoList } from '@/services/utils/types';
 import { getToDoList } from '@/services/ToDoListService';
 import { ApiError } from '@/services/utils/api';
+import { Text } from '@/components/ui/text';
+import ToDoItem from '@/components/toDoList/toDo';
+import CreateToDoModalForm from '@/components/toDoList/CreateToDoModalForm';
 
 export default function ToDoListScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,8 +20,10 @@ export default function ToDoListScreen() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState(false);   
     const [reloadCount, setReloadCount] = useState(0);
+    const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);   // ← new
+
     
-    const refreshToDoLists = () => {
+    const refreshToDoList = () => {
       setIsRefreshing(true);
       setReloadCount((count) => count + 1);
     };
@@ -32,7 +37,7 @@ export default function ToDoListScreen() {
           setToDos(res.todos);
         } catch (e) {
           if (e instanceof ApiError) {
-          showError(e, refreshToDoLists);}
+          showError(e, refreshToDoList);}
           else throw e;
         } finally {
           setIsLoading(false);
@@ -42,16 +47,38 @@ export default function ToDoListScreen() {
       loadToDoList();
     }, [id, showError, reloadCount]);
     
-  
-  
+
     if (isLoading) {
       return <ActivityIndicator size="large" className="mt-8" />;
     }
   return (
-    <View>
-        <Text>{toDoList?.name}</Text>
-        
-      
+      <View className="flex-1 bg-background p-6">        
+        <View className="flex-1">
+          <Text variant="h3">{toDoList?.name}</Text>
+          <FlatList data={toDos}
+              keyExtractor={(toDo) => String(toDo.id)}
+              renderItem={({ item }) => <ToDoItem toDo={item} />}
+              contentContainerClassName="gap-3 pt-4"
+              ListEmptyComponent={<Text variant="muted">No To-Dos Yet.</Text>}
+              refreshing={isRefreshing}
+              onRefresh={refreshToDoList} />
+
+          <Pressable onPress={() => setIsCreateOpen(true)}
+          className="absolute bottom-6 right-2 h-16 w-16 items-center justify-center rounded-full border border-border bg-white shadow-lg active:opacity-80"
+          >
+            <Plus size={28} color="#111" />
+          </Pressable>
+
+          <CreateToDoModalForm
+                  toDoListId={id}
+                  visible={isCreateOpen}
+                  onClose={() => setIsCreateOpen(false)}
+                  onCreated={(toDo) => {
+                    setToDos((current) => [...current, toDo]);
+                    setIsCreateOpen(false);
+                  }}
+          />
+        </View>
     </View>
   );
 }

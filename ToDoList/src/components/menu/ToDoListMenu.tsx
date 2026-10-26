@@ -68,7 +68,7 @@ export default function ToDoListMenu() {
           source={require('../../../assets/icons/task-list-icon-preview.svg')}
           style={{ width: 28, height: 28 }}
         />
-      </Pressable>
+     </Pressable>
 
       <CreateListModalForm
         visible={isCreateOpen}
