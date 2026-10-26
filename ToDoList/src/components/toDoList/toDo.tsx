@@ -19,7 +19,7 @@ export default function ToDoItem({ toDo }: ToDoItemProps) {
   const toggleDone = async (checked: boolean) => {
     setIsDone(checked);                                
     try {
-      await updateToDo(toDo.to_do_list_id, { is_done: checked});
+      await updateToDo(toDo.id, { is_done: checked });
     } 
     catch (e) {
         setIsDone(!checked);                            
