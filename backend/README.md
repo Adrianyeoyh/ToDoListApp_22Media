@@ -1,58 +1,116 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ToDoList API (backend)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 13 JSON API for the ToDoList app, backed by PostgreSQL on Supabase. Installation and the two ways to run it locally (`php artisan serve` or Laravel Herd) are in the [root README](../README.md).
 
-## About Laravel
+## Endpoints
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+All responses are JSON. Validation errors return `422` with `{ "message", "errors": { field: [messages] } }`; missing records return `404`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Health
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Method | Path | Response |
+| --- | --- | --- |
+| GET | `/api/health` | `200 {"status":"ok"}`, or `503 {"status":"unavailable"}` when the database can't be reached |
+| GET | `/health` | `200 {"status":"ok"}` (web server only, no database check) |
+| GET | `/up` | Laravel's built-in health page |
 
-## Learning Laravel
+The app pings `/api/health` to decide whether to work online or offline.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Todo lists
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Method | Path | Body | Response |
+| --- | --- | --- | --- |
+| GET | `/api/todo-lists` | — | All lists, each with its `todos` |
+| POST | `/api/todo-lists` | `{ "name" }` | The new list |
+| GET | `/api/todo-lists/{id}` | — | One list with its `todos` |
+| PUT | `/api/todo-lists/{id}` | `{ "name" }` | The updated list |
+| DELETE | `/api/todo-lists/{id}` | — | `204`; deletes the list and its todos |
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+`name`: required string, max 255 characters.
 
-## Agentic Development
+### Todos
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+| Method | Path | Body | Response |
+| --- | --- | --- | --- |
+| GET | `/api/todos` | — | All todos |
+| POST | `/api/todos` | `{ "to_do_list_id", "description", "is_done"? }` | The new todo |
+| GET | `/api/todos/{id}` | — | One todo |
+| PUT | `/api/todos/{id}` | `{ "description"?, "is_done"? }` | The updated todo; fields left out stay unchanged |
+| DELETE | `/api/todos/{id}` | — | `204` |
+
+`to_do_list_id` must be an existing list; `description` is a required string, max 255 characters; `is_done` defaults to `false`.
+
+Timestamps (`created_at`, `updated_at`) are stored and returned in UTC.
+
+## Code structure
+
+| Folder | Role |
+| --- | --- |
+| `routes/api.php`, `routes/api/*/index.php` | Route groups per resource (`todo-lists`, `todos`, `health`) |
+| `app/Http/Controllers/` | Thin controllers: take validated input, return data objects |
+| `app/Services/` | Business logic and database work (`TodoListService`, `TodoService`) |
+| `app/Data/` | [spatie/laravel-data](https://spatie.be/docs/laravel-data) request and response shapes; request classes hold the validation rules |
+| `app/Models/` | Eloquent models (`ToDoList`, `ToDo`) |
+| `tests/Feature/` | Pest feature tests |
+
+## Supabase connection
+
+The backend connects with a single `DB_URL` and keeps its tables in a dedicated `laravel` schema (`search_path` in `config/database.php`).
+
+1. **Create the schema once.** In the Supabase dashboard, open **SQL Editor** and run:
+
+   ```sql
+   create schema if not exists laravel;
+   ```
+
+   Without it, `php artisan migrate` fails because Postgres has no schema to create the tables in.
+
+2. **Copy the connection string.** In Supabase, click **Connect** and copy the **Session pooler** URI:
+
+   ```
+   postgres://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@[POOLER-HOST]:5432/postgres
+   ```
+
+   Use the session pooler (port `5432`). It works over IPv4 and supports the prepared statements Laravel uses; the transaction pooler (port `6543`) does not.
+
+3. **Put it in `.env`:**
+
+   ```dotenv
+   DB_CONNECTION=pgsql
+   DB_URL=postgres://postgres.abcdefghijkl:your-password@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+   ```
+
+   URL-encode special characters in the password (`@`, `:`, `/`, `#`).
+
+## Environment
+
+| Variable | Notes |
+| --- | --- |
+| `APP_KEY` | Generated by `php artisan key:generate` |
+| `APP_DEBUG` | `true` locally. Set `false` whenever the API is reachable by others (for example during `herd share`), or error responses include stack traces |
+| `DB_CONNECTION`, `DB_URL` | Supabase, see above |
+
+Never commit `.env`.
+
+## Tests and formatting
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php artisan test --compact          # all tests
+php artisan test --compact tests/Feature/HealthTest.php
+vendor/bin/pint --dirty             # format changed PHP files
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Tests run on an in-memory SQLite database (`phpunit.xml`), so they never touch Supabase.
 
-## Contributing
+## Keeping PHP patched
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+With Herd:
 
-## Code of Conduct
+```bash
+herd php:list          # shows installed versions and whether an update is available
+herd php:update all    # latest patch release of every installed version
+herd restart           # reload PHP-FPM with the new binary
+php -v
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Restart `php artisan serve` too if it was running, since it keeps using the old binary until restarted.

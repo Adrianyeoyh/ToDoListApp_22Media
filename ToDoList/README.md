@@ -1,56 +1,113 @@
-# Welcome to your Expo app 👋
+# ToDoList (frontend)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo SDK 57 app for the ToDoList API, using Expo Router, NativeWind (Tailwind) and React Native Reusables. It works offline: when the API can't be reached, changes are saved on the device and synced to the cloud later.
 
-## Get started
+Backend setup and the full local-running guide are in the [root README](../README.md).
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Setup
 
 ```bash
-npm run reset-project
+npm install
+cp .env.example .env
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Set the API address in `.env`:
 
-### Other setup steps
+```dotenv
+EXPO_PUBLIC_API_URL = 'http://10.0.2.2:8003'
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| API runs on | App runs on | Value |
+| --- | --- | --- |
+| `php artisan serve --port=8003` | Android emulator | `http://10.0.2.2:8003` |
+| `php artisan serve --port=8003` | iOS simulator or web | `http://127.0.0.1:8003` |
+| Herd (with a default site) | Android emulator | `http://10.0.2.2` |
+| `herd share` | Anywhere | the Expose URL, e.g. `https://abc123.sharedwithexpose.com` |
 
-## Learn more
+The emulator reaches your Mac at `10.0.2.2`, not `localhost`. See [Point the app at the API](../README.md#point-the-app-at-the-api) and [Share the backend publicly](../README.md#share-the-backend-publicly-with-herd-share) for details.
 
-To learn more about developing your project with Expo, look at the following resources:
+`EXPO_PUBLIC_*` values are baked into the bundle at build time, so restart Metro with `--clear` after editing `.env`.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Running
 
-## Join the community
+The app uses native modules (`react-native-svg`, `react-native-gesture-handler`, `react-native-reanimated`), so it needs a development build rather than Expo Go. Build and install it once (and again after adding a package with native code):
 
-Join our community of developers creating universal apps.
+```bash
+npx expo run:android
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Then start Metro and open the app:
+
+```bash
+adb reverse tcp:8083 tcp:8083
+npx expo start --localhost --port 8083
+```
+
+Press `a` to open it on the emulator, `r` to reload.
+
+`--localhost` with `adb reverse` avoids the app trying an old Wi-Fi IP; port `8083` avoids clashes with Docker on `8081`.
+
+## Offline mode
+
+The app pings `GET /api/health` every 30 seconds (every 10 seconds while the server is down).
+
+| State | What you see | What happens |
+| --- | --- | --- |
+| Server down | "Couldn't connect to server" banner on the home screen; "Saved Locally" and a cloud button next to the title | Reads come from the device copy; creates, edits and deletes apply on the device and are queued |
+| Server back, changes queued | "Saved Locally" and the cloud button | Still working locally until you sync, so queued changes keep their order |
+| Synced | "Saved on Cloud" | Requests go straight to the API and the device copy is refreshed |
+
+Pressing the cloud button sends the queued changes oldest first, then compares the device copy with the cloud copy:
+
+- **Equal:** backed up; status becomes "Saved on Cloud".
+- **Device ahead** (changes still queued because the connection dropped): retries automatically every 30 seconds until they match.
+- **Cloud ahead** (nothing left to send): the cloud copy replaces the device copy.
+
+Requests that never reach the server don't show the error popup; real errors (validation, 404, 500) still do. Items created offline get a temporary negative id until the server assigns a real one. The device copy and queue are JSON files in the app's documents folder, so they survive restarts.
+
+To try it: stop the API (`Ctrl+C` on `php artisan serve`, or `herd stop`), make some changes, start it again and press the cloud button.
+
+## Project structure
+
+```
+src/
+├── app/                      Screens (Expo Router)
+│   ├── _layout.tsx           Providers, gesture root, health pinging
+│   ├── index.tsx             "My Lists" home screen
+│   └── [id].tsx              One list and its todos
+├── components/
+│   ├── feedback/             ErrorModalProvider (global error popup)
+│   ├── menu/                 Home screen: list cards, create/rename/delete modals
+│   ├── toDoList/             List screen: todo item, create modal
+│   ├── sync/                 OfflineBanner, SyncStatus (Saved Locally / Saved on Cloud)
+│   └── ui/                   React Native Reusables primitives
+├── repositories/             Offline-first data access used by components
+│                             (same functions as services, with local fallback)
+├── services/
+│   ├── ToDoListService.ts    Raw API calls
+│   ├── ToDoService.ts
+│   ├── health.ts             /api/health ping
+│   ├── offline/              Device copy, queue, sync, status store
+│   └── utils/                request() wrapper, ApiError, types
+├── hooks/                    use-sync-status, use-server-health, theme hooks
+└── lib/                      Date formatting, cn() helper
+```
+
+Components call `repositories/`, which call `services/` when the server is reachable and fall back to `services/offline/` when it isn't.
+
+## Checks
+
+```bash
+npx tsc --noEmit
+npx expo lint
+```
+
+## Troubleshooting
+
+| Problem | Fix |
+| --- | --- |
+| "Unable to load script" / Metro not running | Start Metro with `--localhost --port 8083`, run `adb reverse tcp:8083 tcp:8083`, then press `a` |
+| App connects to an old IP (e.g. `172.20.10.2`) | `adb shell pm clear com.adrianyeo.ToDoList`, then reopen with `a` |
+| `RNSVG...ViewManager` / native module missing | Rebuild the dev client: `npx expo run:android` |
+| App still uses an old API URL | Restart Metro with `--clear` |
+| Banner shows but the API is running | Check `curl <EXPO_PUBLIC_API_URL>/api/health` from your Mac; for the emulator, swap `10.0.2.2` for `127.0.0.1` |
