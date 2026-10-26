@@ -32,3 +32,6 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 
   return body as T;
 }
+
+// Status 0 means the request never reached the server (offline, server down, timed out).
+export const isNetworkError = (e: unknown): e is ApiError => e instanceof ApiError && e.status === 0;

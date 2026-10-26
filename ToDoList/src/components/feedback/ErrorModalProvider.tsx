@@ -14,6 +14,10 @@ export function ErrorModalProvider({ children }: { children: React.ReactNode }) 
   const [modal, setModal] = useState<{ error: ApiError; onRetry?: () => void } | null>(null);
 
   const showError = (error: ApiError, onRetry?: () => void) => {
+    // Not reaching the server is not an error: the app carries on with local data and the offline banner shows instead.
+    if (error.status === 0) {
+      return;
+    }
     setModal({ error, onRetry });
   };
 

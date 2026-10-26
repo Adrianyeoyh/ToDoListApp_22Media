@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { ApiError } from '@/services/utils/api';
 import type { ToDo } from '@/services/utils/types';
-import { createToDo } from '@/services/ToDoService';
+import { createToDo } from '@/repositories/ToDoRepository';
 
 type CreateToDoModalFormProps = {
   toDoListId: string;

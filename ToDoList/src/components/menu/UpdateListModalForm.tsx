@@ -5,7 +5,7 @@ import { useErrorModal } from '@/components/feedback/ErrorModalProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
-import { updateToDoList } from '@/services/ToDoListService';
+import { updateToDoList } from '@/repositories/ToDoListRepository';
 import { ApiError } from '@/services/utils/api';
 import type { ToDoList } from '@/services/utils/types';
 

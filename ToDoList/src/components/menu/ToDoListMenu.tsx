@@ -1,7 +1,8 @@
 import { useErrorModal } from "@/components/feedback/ErrorModalProvider";
 import { ToDoListMenuCard } from "@/components/menu/ToDoListMenuCard";
 import { useState, useEffect } from "react";
-import { deleteToDoList, getToDoLists } from "@/services/ToDoListService";
+import { deleteToDoList, getToDoLists } from "@/repositories/ToDoListRepository";
+import { useSyncStatus } from "@/hooks/use-sync-status";
 import { View, ActivityIndicator, FlatList, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { Trash2 } from "lucide-react-native";
@@ -21,6 +22,7 @@ type ToDoListMenuProps = {
 
 export default function ToDoListMenu({ isSelecting, selectedIds, onToggleSelected, onExitSelecting }: ToDoListMenuProps) {
   const { showError } = useErrorModal();
+  const { syncVersion } = useSyncStatus();
 
   const [toDoLists, setToDoLists] = useState<ToDoList[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -52,7 +54,7 @@ export default function ToDoListMenu({ isSelecting, selectedIds, onToggleSelecte
       }
     };
     loadToDoLists();
-  }, [showError, reloadCount]);
+  }, [showError, reloadCount, syncVersion]);
 
   const deleteSelected = async () => {
     setIsConfirmDeleteOpen(false);

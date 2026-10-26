@@ -3,6 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ErrorModalProvider } from '@/components/feedback/ErrorModalProvider';
+import { useServerHealth } from '@/hooks/use-server-health';
 import '@/global.css';
 import { PortalHost } from '@rn-primitives/portal';
 
@@ -10,6 +11,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  useServerHealth();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

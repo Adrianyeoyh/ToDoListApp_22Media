@@ -12,3 +12,6 @@ Route::prefix('/todo-lists')
 
 Route::prefix('/todos')
     ->group(base_path('routes/api/todos/index.php'));
+
+Route::prefix('/health')
+    ->group(base_path('routes/api/health/index.php'));

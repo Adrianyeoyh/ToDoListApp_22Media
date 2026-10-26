@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Text } from '@/components/ui/text';
 import { formatDateTime, parseApiTimestamp } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
-import { updateToDo } from '@/services/ToDoService';
+import { updateToDo } from '@/repositories/ToDoRepository';
 import { ApiError } from '@/services/utils/api';
 import type { ToDo } from '@/services/utils/types';
 

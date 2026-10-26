@@ -4,8 +4,10 @@ import { ChevronLeft, Plus } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useErrorModal } from '@/components/feedback/ErrorModalProvider';
 import { ToDo, ToDoList } from '@/services/utils/types';
-import { getToDoList } from '@/services/ToDoListService';
-import { deleteToDo } from '@/services/ToDoService';
+import { getToDoList } from '@/repositories/ToDoListRepository';
+import { deleteToDo } from '@/repositories/ToDoRepository';
+import { useSyncStatus } from '@/hooks/use-sync-status';
+import SyncStatus from '@/components/sync/SyncStatus';
 import { ApiError } from '@/services/utils/api';
 import { Text } from '@/components/ui/text';
 import ToDoItem from '@/components/toDoList/toDo';
@@ -14,7 +16,8 @@ import CreateToDoModalForm from '@/components/toDoList/CreateToDoModalForm';
 export default function ToDoListScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
 
-    const { showError } = useErrorModal();   
+    const { showError } = useErrorModal();
+    const { syncVersion } = useSyncStatus();
   
     const [toDoList, setToDoList] = useState<ToDoList | null>(null);
     const [toDos, setToDos] = useState<ToDo[]>([])
@@ -46,7 +49,7 @@ export default function ToDoListScreen() {
         }
       };
       loadToDoList();
-    }, [id, showError, reloadCount]);
+    }, [id, showError, reloadCount, syncVersion]);
     
 
     const replaceToDo = (updated: ToDo) => {
@@ -90,7 +93,10 @@ export default function ToDoListScreen() {
             <ChevronLeft size={22} color="#111" />
             <Text className="font-medium">Back</Text>
           </Pressable>
-          <Text variant="h3">{toDoList?.name}</Text>
+          <View className="flex-row items-center gap-3">
+            <Text variant="h3">{toDoList?.name}</Text>
+            <SyncStatus />
+          </View>
           <FlatList data={toDos}
               keyExtractor={(toDo) => String(toDo.id)}
               renderItem={({ item }) => <ToDoItem toDo={item} onUpdated={replaceToDo} onDelete={deleteToDoItem} />}
