@@ -48,6 +48,10 @@ export default function ToDoListScreen() {
     }, [id, showError, reloadCount]);
     
 
+    const replaceToDo = (updated: ToDo) => {
+      setToDos((current) => current.map((toDo) => (toDo.id === updated.id ? updated : toDo)));
+    };
+
     if (isLoading) {
       return <ActivityIndicator size="large" className="mt-8" />;
     }
@@ -57,7 +61,7 @@ export default function ToDoListScreen() {
           <Text variant="h3">{toDoList?.name}</Text>
           <FlatList data={toDos}
               keyExtractor={(toDo) => String(toDo.id)}
-              renderItem={({ item }) => <ToDoItem toDo={item} />}
+              renderItem={({ item }) => <ToDoItem toDo={item} onUpdated={replaceToDo} />}
               contentContainerClassName="gap-3 pt-4"
               ListEmptyComponent={<Text variant="muted">No To-Dos Yet.</Text>}
               refreshing={isRefreshing}
