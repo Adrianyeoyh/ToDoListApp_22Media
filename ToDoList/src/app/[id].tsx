@@ -20,7 +20,7 @@ export default function ToDoListScreen() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isRefreshing, setIsRefreshing] = useState(false);   
     const [reloadCount, setReloadCount] = useState(0);
-    const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);   // ← new
+    const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);  
 
     
     const refreshToDoList = () => {
